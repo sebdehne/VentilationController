@@ -11,7 +11,7 @@ The control loop is simple: whichever parameter requests the higest fan speed wi
 
 ## How to extract the selected fan speed from the AC kitchen cooking hoods
 
-When using a central fan, the kitchen hood should be without a built in fan. Unfortunately, there seems to be a rather limited variety of hoods, which support 0-10V fans, to choose from. 
+When using a central fan, the kitchen hood should be without a built in fan. Unfortunately, there seems to be a rather limited variety of hoods, which support 0-10V fans, to choose from; at least here in Norway.
 
 But it is possible to read out the selected fan speed from any (AC) kitchen hood with a little bit of electronics. In my case, I bought an standard AC kitchen hood, which turns out to produce a PWM signal (20V DC) internally. This signal is quite easy to extract by feeding it through a voltage divider and into a digital input pin in the arduino.
 
