@@ -6,31 +6,55 @@
 #include <Adafruit_BME280.h>
 #include <Adafruit_Sensor.h>
 
+struct SensorState
+{
+  boolean in_above_lower_limit_state;
+  uint32_t last_state_change_at;
+};
+
 struct SensorSettings
 {
   u_int8_t limit_from;
   u_int8_t limit_to;
   int16_t offset;
   uint16_t curve_x_1000;
+
+  // if the sensor has been giving a signal above the lower limit for N amount of time, then
+  // disable the output until is has gone below the lower-limit.
+  int give_up_after_time_minutes; // -1 to disable
 };
 
 uint32_t wait_for_pin_a1(boolean expected_value);
 uint8_t readDuticycle();
-uint8_t calculate(uint8_t value, SensorSettings settings);
+uint8_t calculate(uint8_t value, SensorSettings settings, SensorState *sensorState);
 void printValues();
+
+// bathroom state
+boolean is_in_operation = false;
+uint32_t started_operation_at = 0;
 
 Adafruit_BME280 bme;
 
 SensorSettings bathSettings = {
     50,
     90,
-    -20,
-    1500};
+    -50,
+    1500,
+    60 // give_up_after_time_minutes
+};
+SensorState bathState = {
+    false,
+    0};
 SensorSettings kitchenSettings = {
     1,
     90,
     10,
-    1500};
+    1500,
+    -1 // give_up_after_time_minutes
+};
+SensorState kitchenState = {
+    false,
+    0};
 uint8_t baseSetting = 25;
 
 void setup()
@@ -63,10 +87,10 @@ void loop()
   Log.log(buf);
 
   // 3 eval
-  uint8_t kitchen_target = calculate(kitchen, kitchenSettings);
+  uint8_t kitchen_target = calculate(kitchen, kitchenSettings, &kitchenState);
   snprintf(buf, 100, "Kitchen-calculated: %u", kitchen_target);
   Log.log(buf);
-  uint8_t bath_target = calculate(bath, bathSettings);
+  uint8_t bath_target = calculate(bath, bathSettings, &bathState);
   snprintf(buf, 100, "Bath-calculated: %u", bath_target);
   Log.log(buf);
 
@@ -82,19 +106,40 @@ void loop()
 
   Log.log("=======");
 
-  delay(250);
+  delay(2000);
 }
 
-uint8_t calculate(uint8_t value, SensorSettings settings)
+uint8_t calculate(uint8_t value, SensorSettings settings, SensorState *sensorState)
 {
+  if (value < settings.limit_from)
+  {
+    sensorState->in_above_lower_limit_state = false;
+    return 0;
+  }
+
+  if (settings.give_up_after_time_minutes >= 0)
+  {
+    if (!sensorState->in_above_lower_limit_state)
+    {
+      sensorState->in_above_lower_limit_state = true;
+      sensorState->last_state_change_at = millis();
+    }
+    else
+    {
+      uint32_t delta = millis() - sensorState->last_state_change_at;
+      if ((delta / 1000 / 60) >= settings.give_up_after_time_minutes)
+      {
+        // disabled
+        return 0;
+      }
+    }
+  }
+
   if (value > settings.limit_to)
   {
     return 100;
   }
-  if (value < settings.limit_from)
-  {
-    return 0;
-  }
+
   uint8_t calc = ((value * settings.curve_x_1000) / 1000) + settings.offset;
   return min(calc, 100);
 }
@@ -159,4 +204,3 @@ uint32_t wait_for_pin_a1(boolean expected_value)
     }
   }
 }
-
