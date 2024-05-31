@@ -32,7 +32,7 @@
 #define CONFIG_POS_KITCHEN_GIVE_UP 14
 #define CONFIG_LEN 15
 
-#define CONFIG_WIDTH 20
+#define CONFIG_WIDTH 25
 
 static const char *configNames[CONFIG_LEN] = {
     "wifi1-ssid",

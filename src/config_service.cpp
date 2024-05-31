@@ -9,7 +9,7 @@ void ConfigServiceClass::init()
 {
     char logbuf[2];
 
-    if (FlashUtils.readUserdata(0) == 42) // yes, we have valid config in flash - use it
+    if (FlashUtils.readUserdata(0) == 45) // yes, we have valid config in flash - use it
     {
         // config available
         for (int i = 0; i < CONFIG_LEN; i++)
@@ -60,7 +60,7 @@ void ConfigServiceClass::writeConfig()
 {
 
     FlashUtils.prepareWritingUserdata(0, CONFIG_LEN * CONFIG_WIDTH + 1);
-    FlashUtils.write(42);
+    FlashUtils.write(45);
 
     for (int i = 0; i < CONFIG_LEN; i++)
     {
@@ -71,6 +71,12 @@ void ConfigServiceClass::writeConfig()
         }
     }
     FlashUtils.finishWriting();
+#ifdef DEBUG
+        char buf[1000];
+        snprintf(buf, sizeof(buf), "Config written to flash");
+        Log.log(buf);
+#endif
+
 }
 
 ConfigServiceClass ConfigService;

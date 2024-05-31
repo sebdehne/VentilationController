@@ -47,10 +47,13 @@ void setup()
 {
   Serial.begin(115200);
 #ifdef DEBUG
-  while (!Serial)
-  {
-    ; // wait for serial port to connect. Needed for native USB
-  }
+
+
+  // uncommend to wait for USB
+  //while (!Serial)
+  //{
+  //  ; // wait for serial port to connect. Needed for native USB
+  //}
   Log.log("Welcome");
 #endif
 
@@ -72,7 +75,7 @@ void setup()
 }
 
 unsigned long last_ventilation_handled_time = 0;
-const unsigned long ventilation_control_delay = 5000;
+const unsigned long ventilation_control_delay = 2500;
 
 void loop()
 {
