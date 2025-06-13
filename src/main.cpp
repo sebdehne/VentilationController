@@ -121,12 +121,13 @@ void handle_ventilation()
   uint8_t kitchen_target = calculate(kitchen, CONFIG_POS_KITCHEN_LIMIT_FROM, &kitchenState);
   snprintf(buf, 100, "Kitchen-calculated: %u", kitchen_target);
   Log.log(buf);
-  uint8_t bath_target = calculate(bath, CONFIG_POS_BATH_LIMIT_FROM, &bathState);
-  snprintf(buf, 100, "Bath-calculated: %u", bath_target);
-  Log.log(buf);
+  //uint8_t bath_target = calculate(bath, CONFIG_POS_BATH_LIMIT_FROM, &bathState);
+  //snprintf(buf, 100, "Bath-calculated: %u", bath_target);
+  //Log.log(buf);
 
   // 4 write to DAC
-  uint8_t target = max(max(kitchen_target, bath_target), baseSetting);
+  //uint8_t target = max(max(kitchen_target, bath_target), baseSetting);
+  uint8_t target = max(kitchen_target, baseSetting);
   snprintf(buf, 100, "Target: %u", target);
   Log.log(buf);
   uint16_t millivolts = (target * 10000) / 100;
